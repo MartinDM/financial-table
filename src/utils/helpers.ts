@@ -1,4 +1,4 @@
-import { faker, fakerEN_GB } from '@faker-js/faker'
+import { faker } from '@faker-js/faker'
 
 export interface StockData {
   symbol: string

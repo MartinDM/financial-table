@@ -25,7 +25,7 @@ function StocksGrid() {
   const gridApiRef = useRef<GridApi | null>(null)
   const [disableSelections, setDisableSelections] = useState(false)
 
-  const handleGridReady = (params: any) => {
+  const onGridReady = (params: any) => {
     gridApiRef.current = params.api
 
     // Log pinned columns directly here if needed
@@ -97,7 +97,7 @@ function StocksGrid() {
       <h1 className="text-3xl font-bold mb-4">Financial Stocks Table</h1>
       <div style={{ height: 600, width: '100%' }} className="ag-theme-alpine">
         <AgGridReact
-          onGridReady={handleGridReady}
+          onGridReady={onGridReady}
           rowData={rowData}
           columnDefs={colDefs}
           onCellClicked={onCellClicked}

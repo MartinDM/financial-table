@@ -1,12 +1,6 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+// import useMutation from react-query
+import { useQueryClient } from '@tanstack/react-query'
 import { useStocksQuery } from '../hooks/useStocksQuery'
 import type { ReactNode } from 'react'
 import type { StockData } from '../utils/helpers'
@@ -108,23 +102,6 @@ export function StocksProvider({ children }: { children: ReactNode }) {
     return columns
   }, [])
 
-  const onGridReady = useCallback((event: GridReadyEvent) => {
-    event.api.resetColumnState()
-
-    // Log pinned column names using AG Grid API
-    const allColumns = event.api.getColumns()
-    const pinnedColumns = allColumns?.filter((col) => col.isPinned())
-
-    if (pinnedColumns && pinnedColumns.length > 0) {
-      pinnedColumns.forEach((col) => {
-        console.log(
-          'Pinned column:',
-          col.getColDef().headerName || col.getColId(),
-        )
-      })
-    }
-  }, [])
-
   const refresh = () => {
     queryClient.invalidateQueries({ queryKey: ['stocks'] })
   }
@@ -136,7 +113,6 @@ export function StocksProvider({ children }: { children: ReactNode }) {
     isLoading,
     error,
     refresh,
-    onGridReady,
   }
 
   return (
