@@ -1,6 +1,12 @@
 # Financial Table
 
-A modern financial stocks table application built with React, showcasing real-time stock data in an interactive grid.
+An example modern stocks table application built with React, show real-time 'stock data' in an interactive grid.
+
+<a href="https://financial-table-esyfyhvxi-martin-marriotts-projects.vercel.app/">
+<img width="955" height="260" alt="image" src="https://github.com/user-attachments/assets/76e5f0aa-ffe3-4f77-985e-557f2107a6ec" />
+  <p>🚀 <strong> View site</strong></p>
+</a>
+
 
 ## Tech Stack
 
