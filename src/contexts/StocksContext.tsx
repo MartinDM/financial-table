@@ -1,5 +1,4 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
-// import useMutation from react-query
 import { useQueryClient } from '@tanstack/react-query'
 import { useStocksQuery } from '../hooks/useStocksQuery'
 import type { ReactNode } from 'react'
@@ -25,6 +24,15 @@ export function StocksProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (queryData) setStocks(queryData)
   }, [queryData])
+
+  const StatusRenderer = (props: any) => {
+    const isPositive = props.value > 0
+    return (
+      <span style={{ color: isPositive ? 'green' : 'red' }}>
+        {props.value?.toFixed(2) || '0.00'}%
+      </span>
+    )
+  }
 
   const colDefs = useMemo<Array<ColDef>>(() => {
     const columns: Array<ColDef> = [
@@ -73,10 +81,9 @@ export function StocksProvider({ children }: { children: ReactNode }) {
         headerName: 'Change %',
         sortable: true,
         cellStyle: (params) => ({
-          color: params.value >= 0 ? 'green' : 'red',
+          color: params.value >= 0 ? 'yellow' : 'red',
         }),
-        valueFormatter: (params) =>
-          `${params.value >= 0 ? '+' : ''}${params.value?.toFixed(2) || '0.00'}%`,
+        cellRenderer: StatusRenderer,
       },
       {
         field: 'high52Week',
