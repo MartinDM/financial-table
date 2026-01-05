@@ -2,8 +2,7 @@
 
 A modern example financial stocks table application built with React, showcasing real-time stock data in an interactive grid.
 
-![![alt text](image-1.png)
-](image.png)
+🚀 **[Live Demo](https://financial-table.vercel.app/)**
 
 ## Tech Stack
 
