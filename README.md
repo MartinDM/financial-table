@@ -1,12 +1,9 @@
 # Financial Table
 
-An example modern stocks table application built with React, show real-time 'stock data' in an interactive grid.
+A modern example financial stocks table application built with React, showcasing real-time stock data in an interactive grid.
 
-<a href="https://financial-table.vercel.app">
-<img width="955" height="260" alt="image" src="https://github.com/user-attachments/assets/76e5f0aa-ffe3-4f77-985e-557f2107a6ec" />
-  <p>🚀 <strong> View site</strong></p>
-</a>
-
+![![alt text](image-1.png)
+](image.png)
 
 ## Tech Stack
 
@@ -70,12 +67,13 @@ All stock data flows through this context, making it easy to access from any com
 The application uses TanStack Query for data fetching with a custom hook pattern:
 
 **1. Query Hook (`src/hooks/useStocksQuery.ts`)**
+
 ```typescript
 export function useStocksQuery() {
   return useQuery({
     queryKey: ['stocks'],
     queryFn: async () => {
-      await new Promise(resolve => setTimeout(resolve, 1500)) // Simulated delay
+      await new Promise((resolve) => setTimeout(resolve, 1500)) // Simulated delay
       return getStocks()
     },
   })
@@ -83,31 +81,34 @@ export function useStocksQuery() {
 ```
 
 **2. Context Provider (`src/contexts/StocksContext.tsx`)**
+
 ```typescript
 export function StocksProvider({ children }: { children: ReactNode }) {
   const { data: queryData, isLoading, error } = useStocksQuery()
   const [stocks, setStocks] = useState<StockData[]>(queryData || [])
-  
+
   useEffect(() => {
     if (queryData) setStocks(queryData)
   }, [queryData])
-  
+
   // ... provides rowData, colDefs, isLoading, error, refresh
 }
 ```
 
 **3. Component Usage**
+
 ```typescript
 function StocksGrid() {
   const { rowData, colDefs, isLoading } = useStocks()
-  
+
   if (isLoading) return <div>Loading...</div>
-  
+
   return <AgGridReact rowData={rowData} columnDefs={colDefs} />
 }
 ```
 
 This pattern provides:
+
 - **Automatic caching** - Data is cached by TanStack Query
 - **Loading states** - Built-in loading and error handling
 - **Easy refetching** - Call `refresh()` to invalidate and refetch

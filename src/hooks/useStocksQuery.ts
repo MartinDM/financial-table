@@ -9,5 +9,6 @@ export function useStocksQuery() {
       await new Promise((resolve) => setTimeout(resolve, 1000))
       return getStocks()
     },
+    staleTime: 1000 * 60 * 5, // 5 minutes - data is considered fresh for this duration
   })
 }
