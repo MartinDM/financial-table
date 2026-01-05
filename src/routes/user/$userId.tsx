@@ -7,6 +7,6 @@ export const Route = createFileRoute('/user/$userId')({
 // get user from params
 
 function RouteComponent() {
-  const userId = '$userId' // replace with actual param retrieval logic
-  return <div>Hello user, </div>
+  const { userId } = Route.useParams()
+  return <div>Hello user {userId}</div>
 }
