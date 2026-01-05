@@ -4,6 +4,9 @@ A modern example financial stocks table application built with React, showcasing
 
 🚀 **[Live Demo](https://financial-table.vercel.app/)**
 
+
+[<img width="1860" height="776" alt="image" src="https://github.com/user-attachments/assets/0c0fdf4d-3185-411a-aa13-c8f0efe0b0ea" />](https://financial-table.vercel.app/)
+
 ## Tech Stack
 
 - **[React 19](https://react.dev/)** - UI library
