@@ -5,8 +5,16 @@ import { AgGridReact } from 'ag-grid-react'
 import { StocksProvider, useStocks } from '../contexts/StocksContext'
 import type { GridApi } from 'ag-grid-community'
 import { Button } from '@/components/ui/button'
+import { ActiveFilterSummary } from '@/components/ActiveFilterSummary'
 
 ModuleRegistry.registerModules([AllCommunityModule])
+
+const SYMBOL_FILTER_OPTIONS = {
+  contains: 'Contains',
+  equals: 'Equals',
+  startsWith: 'Starts with',
+  endsWith: 'Ends with',
+} as const
 
 export const Route = createFileRoute('/')({
   component: App,
@@ -32,6 +40,8 @@ function StocksGrid() {
   )
   const [filterMode, setFilterMode] = useState<'AND' | 'OR'>('OR')
   const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const [symbolFilter, setSymbolFilter] = useState<string>('contains')
+  const [symbolFilterValue, setSymbolFilterValue] = useState<string>('')
 
   const sectorNames = useMemo(
     () => Array.from(new Set(rowData.map((stock) => stock.sector))).sort(),
@@ -45,26 +55,72 @@ function StocksGrid() {
 
   // Filter data based on AND/OR logic
   const filteredRowData = useMemo(() => {
-    if (selectedSectors.length === 0 && selectedIndustries.length === 0) {
-      return rowData
-    }
-
     return rowData.filter((stock) => {
-      const matchesSector =
-        selectedSectors.length === 0 || selectedSectors.includes(stock.sector)
-      const matchesIndustry =
-        selectedIndustries.length === 0 ||
-        selectedIndustries.includes(stock.industry)
+      // Symbol filter logic
+      let matchesSymbol = true
+      if (symbolFilterValue.trim()) {
+        const stockSymbol = stock.symbol
 
+        switch (symbolFilter) {
+          case 'contains':
+            matchesSymbol = stockSymbol
+              .toLowerCase()
+              .includes(symbolFilterValue.toLowerCase())
+            break
+          case 'equals':
+            matchesSymbol =
+              stockSymbol.toLowerCase() === symbolFilterValue.toLowerCase()
+            break
+          case 'startsWith':
+            matchesSymbol = stockSymbol
+              .toLowerCase()
+              .startsWith(symbolFilterValue.toLowerCase())
+            break
+          case 'endsWith':
+            matchesSymbol = stockSymbol
+              .toLowerCase()
+              .endsWith(symbolFilterValue.toLowerCase())
+            break
+        }
+      }
+
+      const hasSectorFilter = selectedSectors.length > 0
+      const hasIndustryFilter = selectedIndustries.length > 0
+      const hasSymbolFilter = symbolFilterValue.trim().length > 0
+
+      // If no filters are active, show all
+      if (!hasSectorFilter && !hasIndustryFilter && !hasSymbolFilter) {
+        return true
+      }
+
+      const matchesSector = hasSectorFilter
+        ? selectedSectors.includes(stock.sector)
+        : false
+      const matchesIndustry = hasIndustryFilter
+        ? selectedIndustries.includes(stock.industry)
+        : false
+
+      // Build list of active filter results
+      const activeFilters = []
+      if (hasSectorFilter) activeFilters.push(matchesSector)
+      if (hasIndustryFilter) activeFilters.push(matchesIndustry)
+      if (hasSymbolFilter) activeFilters.push(matchesSymbol)
+
+      // Apply OR/AND logic only to active filters
       if (filterMode === 'OR') {
-        // OR logic: show row if it matches ANY selected filter
-        return matchesSector || matchesIndustry
+        return activeFilters.some((match) => match === true)
       } else {
-        // AND logic: show row only if it matches ALL selected filters
-        return matchesSector && matchesIndustry
+        return activeFilters.every((match) => match === true)
       }
     })
-  }, [rowData, selectedSectors, selectedIndustries, filterMode])
+  }, [
+    rowData,
+    selectedSectors,
+    selectedIndustries,
+    filterMode,
+    symbolFilter,
+    symbolFilterValue,
+  ])
 
   const toggleSector = (sector: string) => {
     setSelectedSectors((prev) =>
@@ -80,6 +136,10 @@ function StocksGrid() {
         ? prev.filter((i) => i !== industry)
         : [...prev, industry],
     )
+  }
+
+  const handleSymbolFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSymbolFilterValue(e.target.value)
   }
 
   const clearFilters = () => {
@@ -155,7 +215,6 @@ function StocksGrid() {
   return (
     <div className="p-4">
       <h1 className="text-3xl font-bold mb-4">Financial Stocks Table</h1>
-
       {/* Filter Controls */}
       <div className="mb-4 bg-slate-100 rounded-lg">
         {/* Collapsible Header */}
@@ -258,6 +317,48 @@ function StocksGrid() {
                 </div>
               </div>
 
+              {/* {symbol filter */}
+              <div className="flex-1">
+                <>
+                  <label className="block text-sm font-medium mb-2">
+                    Symbol
+                  </label>
+                </>
+                <>
+                  <select
+                    value={symbolFilter}
+                    onChange={(e) => setSymbolFilter(e.target.value)}
+                    className="px-3 py-2 border rounded-md text-sm bg-white"
+                  >
+                    {Object.entries(SYMBOL_FILTER_OPTIONS).map(
+                      ([value, label]) => (
+                        <option key={value} value={value}>
+                          {label}
+                        </option>
+                      ),
+                    )}
+                  </select>
+                  <input
+                    type="text"
+                    value={symbolFilterValue}
+                    onChange={handleSymbolFilterChange}
+                    className="ml-2 px-3 py-2 border rounded-md text-sm w-32"
+                    placeholder="Filter value"
+                  />
+                  <div className="mt-2 text-xs text-gray-500 flex">
+                    <input
+                      type="checkbox"
+                      id="matchCase"
+                      name="matchCase"
+                      className="ml-2"
+                    />
+                    <label htmlFor="matchCase" className="text-sm ml-1">
+                      Match Case
+                    </label>
+                  </div>
+                </>
+              </div>
+
               {/* Industry Filter */}
               <div className="flex-1">
                 <label className="block text-sm font-medium mb-2">
@@ -321,26 +422,18 @@ function StocksGrid() {
               </div>
             </div>
 
-            {/* Active Filter Summary */}
-            {(selectedSectors.length > 0 || selectedIndustries.length > 0) && (
-              <div className="mt-3 text-sm text-gray-600">
-                Showing {filteredRowData.length} of {rowData.length} stocks
-                {selectedSectors.length > 0 && (
-                  <span className="ml-2">
-                    • Sectors: {selectedSectors.join(', ')}
-                  </span>
-                )}
-                {selectedIndustries.length > 0 && (
-                  <span className="ml-2">
-                    • Industries: {selectedIndustries.join(', ')}
-                  </span>
-                )}
-              </div>
-            )}
+            <ActiveFilterSummary
+              filteredCount={filteredRowData.length}
+              totalCount={rowData.length}
+              selectedSectors={selectedSectors}
+              selectedIndustries={selectedIndustries}
+              symbolFilterValue={symbolFilterValue}
+              symbolFilter={symbolFilter}
+              symbolFilterOptions={SYMBOL_FILTER_OPTIONS}
+            />
           </div>
         )}
-      </div>
-
+      </div>{' '}
       <div style={{ height: 600, width: '100%' }} className="ag-theme-alpine">
         <AgGridReact
           onGridReady={onGridReady}
